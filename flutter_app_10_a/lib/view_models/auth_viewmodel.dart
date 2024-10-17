@@ -7,9 +7,9 @@ class AuthViewmodel extends ChangeNotifier {
   bool _loading = false;
   String? _message;
 
-  User? get user => user;
-  bool? get loading => loading;
-  String? get message => message;
+  User? get user => _user;
+  bool? get loading => _loading;
+  String? get message => _message;
 
   final AuthService authService = AuthService();
 
@@ -21,7 +21,7 @@ class AuthViewmodel extends ChangeNotifier {
     final response = await authService.login(email, password);
     if(response['success']){
       _user = User.fromJson(response['data']);
-      await authService.saveToken(_user!.token);
+      await authService.saveUser(_user!);
     }else{
       _message=response['message'];
     }
@@ -37,7 +37,7 @@ class AuthViewmodel extends ChangeNotifier {
     final response = await authService.register(name, email, password);
     if(response['success']){
       _user = User.fromJson(response['data']);
-      await authService.saveToken(_user!.token);
+      await authService.saveUser(_user!);
     }else{
       _message=response['message'];
     }
@@ -45,16 +45,24 @@ class AuthViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> logOut() async{
-    authService.removeToken();
+  Future<void> logOut() async{  
+    authService.removeUser();
     _user = null;
     notifyListeners();
   }
 
   Future<void> checkSession () async{
-    final String? token = await authService.getToken();
-    token != null ? (
-      _message='Token exists'
-    ) : _message="Token doesn't exists";
+    final User? user = await authService.getUser();
+    user != null ? (
+      _user = user,
+      _message='User exists'
+    ) : (
+      _user = null,
+      _message="User doesn't exists"
+    );
+  }
+
+  Future<bool> validateToken() async {
+    return await authService.validateToken();
   }
 }

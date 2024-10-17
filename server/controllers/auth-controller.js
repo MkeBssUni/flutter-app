@@ -9,6 +9,7 @@ const generateToken = (id) => {
 
 exports.registerUser = async (req, res) => {
   const { name, email, password } = req.body;
+  console.log("register", req.body);
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -29,6 +30,7 @@ exports.registerUser = async (req, res) => {
         return res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Error creating user: ",error });
   }
 };
@@ -36,6 +38,7 @@ exports.registerUser = async (req, res) => {
 
 exports.login = async (req, res)=> {
     const {email, password} = req.body;
+    console.log("login", req.body);
     const user = await User.findOne({email});
     
     if(!user){
